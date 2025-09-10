@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   LayoutDashboard, 
   AlertCircle, 
@@ -29,7 +28,7 @@ const menuItems = [
 export function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }: SidebarProps) {
   return (
     <div className={`bg-white dark:bg-gray-800 h-screen shadow-lg transition-all duration-300 flex flex-col ${
-      isCollapsed ? 'w-16' : 'w-64'
+      isCollapsed ? 'w-20' : 'w-64'  // Increased collapsed width to accommodate larger icons
     }`}>
       <div className="flex items-center justify-between p-4">
         {!isCollapsed && (
@@ -39,18 +38,18 @@ export function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         >
           {isCollapsed ? (
-            <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <ChevronRight className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           ) : (
-            <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            <ChevronLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
           )}
         </button>
       </div>
       
       <nav className="flex-1 px-4 pb-4">
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -59,14 +58,16 @@ export function Sidebar({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }
               <li key={item.id}>
                 <button
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
+                  className={`w-full flex items-center rounded-lg transition-colors ${
+                    isCollapsed ? 'p-3 justify-center' : 'px-4 py-3'
+                  } ${
                     isActive
                       ? 'bg-indigo-600 text-white'
                       : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                   title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-5 h-5 ${isCollapsed ? 'mx-auto' : 'mr-3'}`} />
+                  <Icon className={`${isCollapsed ? 'w-7 h-7' : 'w-5 h-5 mr-3'}`} />
                   {!isCollapsed && (
                     <span className="font-medium">{item.label}</span>
                   )}
