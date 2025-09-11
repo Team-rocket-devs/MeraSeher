@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 interface LoginProps {
   onLogin: () => void;
 }
@@ -11,6 +11,8 @@ export function Login({ onLogin }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+    const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -19,6 +21,7 @@ export function Login({ onLogin }: LoginProps) {
     setTimeout(() => {
       setIsLoading(false);
       onLogin();
+       navigate("/dashboard", { replace: true });
     }, 1000);
   };
 
