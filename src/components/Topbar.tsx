@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Search, Bell, Sun, Moon, ChevronDown } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
-export function Topbar() {
+interface TopbarProps {
+  onLogout: () => void;
+}
+
+export function Topbar({ onLogout }: TopbarProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { isDark, toggleTheme } = useTheme();
 
@@ -71,9 +75,12 @@ export function Topbar() {
                   Settings
                 </a>
                 <hr className="border-gray-200 dark:border-gray-700" />
-                <a href="#" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <button 
+                  onClick={onLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
                   Sign Out
-                </a>
+                </button>
               </div>
             )}
           </div>
