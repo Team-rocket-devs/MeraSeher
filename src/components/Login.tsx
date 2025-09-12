@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from "firebase/auth";
+import auth from "../firebase"; // make sure path is correct
+
 interface LoginProps {
   onLogin: () => void;
 }
@@ -10,19 +13,24 @@ export function Login({ onLogin }: LoginProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    setError(null);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
       onLogin();
-       navigate("/dashboard", { replace: true });
-    }, 1000);
+      navigate("/dashboard", { replace: true });
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -86,7 +94,7 @@ export function Login({ onLogin }: LoginProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
-                    placeholder="admin@civic.gov"
+                    placeholder="Enter your email"
                     required
                   />
                 </div>
@@ -148,7 +156,7 @@ export function Login({ onLogin }: LoginProps) {
 
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
-                Demo credentials: admin@civic.gov / password
+                Demo credentials: ki7333655@gmail.com / khairul
               </p>
             </div>
           </div>
