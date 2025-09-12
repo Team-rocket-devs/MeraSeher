@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   AlertCircle, 
   Clock, 
@@ -25,14 +24,14 @@ export function StatCard({ stat }: StatCardProps) {
   const isPositiveTrend = stat.trend > 0;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className={`p-3 rounded-lg bg-opacity-10 ${stat.color.replace('text-', 'bg-')}`}>
             <Icon className={`w-6 h-6 ${stat.color}`} />
           </div>
           <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-gray-600 dark:text-slate-400">
               {stat.title}
             </p>
             <p className="text-2xl font-extrabold text-gray-900 dark:text-white">

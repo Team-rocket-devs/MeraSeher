@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { Login } from './components/Login';
@@ -62,7 +62,7 @@ function App() {
             path="/dashboard" 
             element={
               isAuthenticated ? (
-                <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+                <div className="flex h-screen bg-gray-100 dark:bg-slate-950">
                   <Sidebar
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
