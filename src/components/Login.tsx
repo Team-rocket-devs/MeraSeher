@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -34,25 +34,30 @@ export function Login({ onLogin }: LoginProps) {
     resolver: zodResolver(loginSchema),
   });
 
-  
-const onSubmit = async (data: LoginFormValues) => {
-  setIsLoading(true);
-  setFirebaseError(null);
 
-  try {
-    await signInWithEmailAndPassword(auth, data.email, data.password);
-    onLogin();
-    navigate("/dashboard", { replace: true });
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      setFirebaseError(err.message);
-    } else {
-      setFirebaseError("An unexpected error occurred");
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
+    setFirebaseError(null);
+
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        data.email.trim(),
+        data.password.trim()
+      );
+
+      onLogin();
+      navigate("/dashboard", { replace: true });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setFirebaseError(err.message);
+      } else {
+        setFirebaseError("An unexpected error occurred");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -118,11 +123,10 @@ const onSubmit = async (data: LoginFormValues) => {
                     id="email"
                     type="email"
                     {...register("email")}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
-                      errors.email
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${errors.email
                         ? "border-red-500 focus:ring-red-500"
                         : "border-gray-300 focus:ring-indigo-500"
-                    }`}
+                      }`}
                     placeholder="Enter your email"
                   />
                 </div>
@@ -147,11 +151,10 @@ const onSubmit = async (data: LoginFormValues) => {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     {...register("password")}
-                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
-                      errors.password
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${errors.password
                         ? "border-red-500 focus:ring-red-500"
                         : "border-gray-300 focus:ring-indigo-500"
-                    }`}
+                      }`}
                     placeholder="Enter your password"
                   />
                   <button

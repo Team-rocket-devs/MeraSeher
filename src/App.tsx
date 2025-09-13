@@ -1,4 +1,4 @@
-import  { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { Login } from './components/Login';
@@ -10,18 +10,23 @@ import { Departments } from './components/Departments';
 import { Analytics } from './components/Analytics';
 import { Settings } from './components/Settings';
 import { Profile } from './components/Profile';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import auth from './firebase';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-    const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
+  const handleLogout = async () => {
+    await signOut(auth);
     setActiveTab('dashboard');
   };
 
@@ -44,22 +49,26 @@ function App() {
     }
   };
 
+  if (isAuthenticated === null) {
+    return <div className="flex items-center justify-center h-screen">Checking session...</div>;
+  }
+
   return (
     <Router>
       <ThemeProvider>
         <Routes>
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
               isAuthenticated ? (
                 <Navigate to="/dashboard" replace />
               ) : (
-                <Login onLogin={handleLogin} />
+                <Login onLogin={() => {}} />
               )
-            } 
+            }
           />
-          <Route 
-            path="/dashboard" 
+          <Route
+            path="/dashboard"
             element={
               isAuthenticated ? (
                 <div className="flex h-screen bg-gray-100 dark:bg-slate-950">
@@ -69,19 +78,15 @@ function App() {
                     isCollapsed={sidebarCollapsed}
                     setIsCollapsed={setSidebarCollapsed}
                   />
-                  
                   <div className="flex-1 flex flex-col overflow-hidden">
                     <Topbar onLogout={handleLogout} />
-                    
-                    <main className="flex-1 overflow-y-auto">
-                      {renderContent()}
-                    </main>
+                    <main className="flex-1 overflow-y-auto">{renderContent()}</main>
                   </div>
                 </div>
               ) : (
                 <Navigate to="/" replace />
               )
-            } 
+            }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
