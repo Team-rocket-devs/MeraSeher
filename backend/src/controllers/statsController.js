@@ -1,11 +1,11 @@
-const Issue = require("../models/Issue");
+import Issue from "../models/Issue.js";
 
 // Get dashboard stats
-exports.getStats = async (req, res) => {
+export const getStats = async (req, res) => {
   try {
     const totalIssues = await Issue.countDocuments();
-    const resolvedIssues = await Issue.countDocuments({ status: "resolved" });
-    const pendingIssues = await Issue.countDocuments({ status: "pending" });
+    const resolvedIssues = await Issue.countDocuments({ status: "Resolved" });
+    const pendingIssues = await Issue.countDocuments({ status: { $in: ["Open", "In Progress"] } });
 
     // Group by department
     const issuesByDepartment = await Issue.aggregate([
