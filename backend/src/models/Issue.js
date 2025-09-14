@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 const issueSchema = new mongoose.Schema({
+  issueId: {
+    type: String,
+    required: [true, 'Issue title is required'],
+    trim: true
+  },
   title: {
     type: String,
     required: [true, 'Issue title is required'],
@@ -14,7 +19,7 @@ const issueSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Issue category is required'],
-    enum: ['Road Maintenance', 'Street Light', 'Waste Management', 'Parks & Recreation', 'Water Supply', 'Drainage', 'Other']
+    enum: ['Road Maintenance', 'Street Light', 'Waste Management', 'Parks & Recreation', 'Water Supply', 'Drainage','Sanitation', 'Other']
   },
   priority: {
     type: String,

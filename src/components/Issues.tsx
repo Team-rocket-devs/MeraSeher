@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Filter, Download, Eye } from 'lucide-react';
-import { mockIssues } from '../data/mockData';
 import { Issue } from '../types';
 import { IssueModal } from './IssueModal';
 
 export function Issues() {
+  const [issues, setIssues] = useState<Issue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
   const [filters, setFilters] = useState({
     status: 'All',
@@ -12,21 +12,50 @@ export function Issues() {
     department: 'All'
   });
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     Open: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
     'In Progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    Resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+    Resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    Closed: 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
   };
 
-  const priorityColors = {
+  const priorityColors: Record<string, string> = {
     Low: 'text-green-600',
     Medium: 'text-yellow-600',
     High: 'text-orange-600',
     Critical: 'text-red-600'
   };
 
+  // 🔹 Fetch issues from backend
+  useEffect(() => {
+    const fetchIssues = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/issues/get'); // adjust if proxy is set
+        const data = await res.json();
+        if (data.success) {
+          setIssues(data.data);
+        } else {
+          console.error(data.message);
+        }
+      } catch (err) {
+        console.error('Error fetching issues:', err);
+      }
+    };
+    fetchIssues();
+  }, []);
+
+  // 🔹 Apply filters (optional)
+  const filteredIssues = issues.filter((issue) => {
+    return (
+      (filters.status === 'All' || issue.status === filters.status) &&
+      (filters.priority === 'All' || issue.priority === filters.priority) &&
+      (filters.department === 'All' || issue.department?.name === filters.department)
+    );
+  });
+
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -36,7 +65,7 @@ export function Issues() {
             Track and manage all civic issues
           </p>
         </div>
-        
+
         <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors">
           <Download className="w-4 h-4" />
           <span>Export</span>
@@ -49,20 +78,23 @@ export function Issues() {
           <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters:</span>
           
+          {/* Status filter */}
           <select
             value={filters.status}
-            onChange={(e) => setFilters({...filters, status: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
             className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
           >
             <option value="All">All Status</option>
             <option value="Open">Open</option>
             <option value="In Progress">In Progress</option>
             <option value="Resolved">Resolved</option>
+            <option value="Closed">Closed</option>
           </select>
 
+          {/* Priority filter */}
           <select
             value={filters.priority}
-            onChange={(e) => setFilters({...filters, priority: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
             className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
           >
             <option value="All">All Priorities</option>
@@ -72,9 +104,10 @@ export function Issues() {
             <option value="Critical">Critical</option>
           </select>
 
+          {/* Department filter */}
           <select
             value={filters.department}
-            onChange={(e) => setFilters({...filters, department: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, department: e.target.value })}
             className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
           >
             <option value="All">All Departments</option>
@@ -91,59 +124,33 @@ export function Issues() {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Priority
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Assigned Dept
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Assigned Dept</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {mockIssues.map((issue) => (
-                <tr key={issue.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    {issue.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {issue.category}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {issue.location}
-                  </td>
+              {filteredIssues.map((issue) => (
+                <tr key={issue._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{issue.issueId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{issue.category}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{issue.location?.address}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`font-semibold ${priorityColors[issue.priority]}`}>
-                      {issue.priority}
-                    </span>
+                    <span className={`font-semibold ${priorityColors[issue.priority]}`}>{issue.priority}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[issue.status]}`}>
-                      {issue.status}
-                    </span>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[issue.status]}`}>{issue.status}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {issue.assignedDept}
+                    {issue.department?.name || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {issue.date}
+                    {new Date(issue.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button
@@ -160,11 +167,9 @@ export function Issues() {
         </div>
       </div>
 
+      {/* Modal */}
       {selectedIssue && (
-        <IssueModal
-          issue={selectedIssue}
-          onClose={() => setSelectedIssue(null)}
-        />
+        <IssueModal issue={selectedIssue} onClose={() => setSelectedIssue(null)} />
       )}
     </div>
   );

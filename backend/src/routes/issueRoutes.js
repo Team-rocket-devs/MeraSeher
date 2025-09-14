@@ -10,13 +10,13 @@ import {
 const router = express.Router();
 
 // GET /api/issues - Get all issues
-router.get("/", getIssues);
+router.get("/get", getIssues);
 
 // GET /api/issues/:id - Get single issue
 router.get("/:id", getIssue);
 
 // POST /api/issues - Create new issue
-router.post("/", createIssue);
+router.post("/create", createIssue);
 
 // PUT /api/issues/:id - Update issue
 router.put("/:id", updateIssue);
