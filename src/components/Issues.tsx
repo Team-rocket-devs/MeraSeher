@@ -54,6 +54,60 @@ export function Issues() {
     );
   });
 
+  // export button logic/code
+  const exportToCSV = () => {
+    if (filteredIssues.length === 0) {
+      alert("No issues available to export!");
+      return;
+    }
+
+    // Define CSV headers
+    const headers = [
+      "Issue ID",
+      "Title",
+      "Category",
+      "Priority",
+      "Status",
+      "Department",
+      "Location",
+      "Reporter Name",
+      "Reporter Email",
+      "Reporter Phone",
+      "Created At"
+    ];
+
+    // Map issues into CSV rows
+    const rows = filteredIssues.map(issue => [
+      issue.issueId,
+      issue.title,
+      issue.category,
+      issue.priority,
+      issue.status,
+      issue.department?.name || "N/A",
+      issue.location?.address || "N/A",
+      issue.reporter?.name || "N/A",
+      issue.reporter?.email || "N/A",
+      issue.reporter?.phone || "N/A",
+      new Date(issue.createdAt).toLocaleString()
+    ]);
+
+    // Build CSV content
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(","))
+      .join("\n");
+
+    // Download as file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `issues_export_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -67,7 +121,9 @@ export function Issues() {
           </p>
         </div>
 
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors">
+        <button
+          onClick={exportToCSV}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors">
           <Download className="w-4 h-4" />
           <span>Export</span>
         </button>
@@ -78,7 +134,7 @@ export function Issues() {
         <div className="flex items-center space-x-4">
           <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters:</span>
-          
+
           {/* Status filter */}
           <select
             value={filters.status}

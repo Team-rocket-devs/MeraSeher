@@ -16,7 +16,7 @@ router.get('/', getDepartments);
 router.get('/:id', getDepartment);
 
 // POST /api/departments - Create new department
-router.post('/', createDepartment);
+router.post('/create', createDepartment);
 
 // PUT /api/departments/:id - Update department
 router.put('/:id', updateDepartment);
