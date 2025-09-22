@@ -34,6 +34,7 @@ export function Issues() {
         const data = await res.json();
         if (data.success) {
           setIssues(data.data);
+          console.log(data);
         } else {
           console.error(data.message);
         }

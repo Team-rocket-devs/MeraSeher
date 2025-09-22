@@ -30,7 +30,7 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
       <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Issue Details - {issue.id}
+            Issue Details - {issue.issueId}
           </h2>
           <button
             onClick={onClose}
@@ -48,7 +48,7 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
                 Images
               </h3>
               <div className="grid grid-cols-1 gap-4">
-                {issue.images.map((image, index) => (
+                {issue.images?.map((image, index) => (
                   <img
                     key={index}
                     src={image}
@@ -66,7 +66,7 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
               <div className="bg-gray-100 dark:bg-gray-700 rounded-lg h-48 flex items-center justify-center">
                 <div className="text-center">
                   <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500 dark:text-gray-400">{issue.location}</p>
+                  <p className="text-gray-500 dark:text-gray-400">{issue.location?.address}</p>
                 </div>
               </div>
             </div>
@@ -134,7 +134,7 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
                 Activity Log
               </h3>
               <div className="space-y-3 max-h-48 overflow-y-auto">
-                {issue.activities.map((activity) => (
+                {issue.activities?.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3">
                     <div className="bg-indigo-100 dark:bg-indigo-900 rounded-full p-2">
                       <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-300" />
