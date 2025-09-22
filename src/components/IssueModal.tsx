@@ -1,5 +1,5 @@
-import  { useState } from 'react';
-import { X, MapPin, User, Calendar, Clock } from 'lucide-react';
+import { useState } from 'react';
+import { X, MapPin, User, Clock } from 'lucide-react';
 import { Issue } from '../types';
 
 interface IssueModalProps {
@@ -8,21 +8,27 @@ interface IssueModalProps {
 }
 
 export function IssueModal({ issue, onClose }: IssueModalProps) {
-  const [selectedStatus, setSelectedStatus] = useState(issue?.status || 'Open');
-  
+  // ✅ Explicit union type for state
+  const [selectedStatus, setSelectedStatus] = useState<Issue['status']>(
+    issue?.status || 'Open'
+  );
+
   if (!issue) return null;
 
-  const statusColors = {
+  // ✅ Added "Closed"
+  const statusColors: Record<Issue['status'], string> = {
     Open: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-    'In Progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    Resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+    'In Progress':
+      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    Resolved: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    Closed: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   };
 
   const priorityColors = {
     Low: 'text-green-600',
     Medium: 'text-yellow-600',
     High: 'text-orange-600',
-    Critical: 'text-red-600'
+    Critical: 'text-red-600',
   };
 
   return (
@@ -30,7 +36,8 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
       <div className="bg-white dark:bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Issue Details - {issue.id}
+            {/* ❌ was issue.id → ✅ use issue._id */}
+            Issue Details - {issue._id}
           </h2>
           <button
             onClick={onClose}
@@ -48,7 +55,7 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
                 Images
               </h3>
               <div className="grid grid-cols-1 gap-4">
-                {issue.images.map((image, index) => (
+                {(issue.images ?? []).map((image, index) => (
                   <img
                     key={index}
                     src={image}
@@ -66,7 +73,10 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
               <div className="bg-gray-100 dark:bg-gray-700 rounded-lg h-48 flex items-center justify-center">
                 <div className="text-center">
                   <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500 dark:text-gray-400">{issue.location}</p>
+                  {/* ❌ was issue.location → ✅ use issue.location?.address */}
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {issue.location?.address}
+                  </p>
                 </div>
               </div>
             </div>
@@ -85,7 +95,7 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
                   </label>
                   <p className="text-gray-900 dark:text-white">{issue.category}</p>
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Priority
@@ -99,7 +109,9 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
                   <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Status
                   </label>
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${statusColors[issue.status]}`}>
+                  <span
+                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${statusColors[issue.status]}`}
+                  >
                     {issue.status}
                   </span>
                 </div>
@@ -108,7 +120,9 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
                   <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                     Description
                   </label>
-                  <p className="text-gray-900 dark:text-white">{issue.description}</p>
+                  <p className="text-gray-900 dark:text-white">
+                    {issue.description}
+                  </p>
                 </div>
               </div>
             </div>
@@ -121,28 +135,38 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
                 <div className="flex items-center">
                   <User className="w-4 h-4 text-gray-500 mr-2" />
-                  <span className="text-gray-900 dark:text-white">{issue.reporter.name}</span>
+                  <span className="text-gray-900 dark:text-white">
+                    {issue.reporter.name}
+                  </span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{issue.reporter.email}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{issue.reporter.phone}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {issue.reporter.email}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {issue.reporter.phone}
+                </p>
               </div>
             </div>
 
-            {/* Activity Log */}
+            {/* Notes (Activity Log) */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
                 Activity Log
               </h3>
               <div className="space-y-3 max-h-48 overflow-y-auto">
-                {issue.activities.map((activity) => (
-                  <div key={activity.id} className="flex items-start space-x-3">
+                {/* ❌ was issue.activities → ✅ use issue.notes */}
+                {(issue.notes ?? []).map((note, idx) => (
+                  <div key={idx} className="flex items-start space-x-3">
                     <div className="bg-indigo-100 dark:bg-indigo-900 rounded-full p-2">
                       <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-300" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-900 dark:text-white">{activity.message}</p>
+                      <p className="text-sm text-gray-900 dark:text-white">
+                        {note.message}
+                      </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        by {activity.user} • {new Date(activity.timestamp).toLocaleDateString()}
+                        by {note.author} •{' '}
+                        {new Date(note.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -158,20 +182,24 @@ export function IssueModal({ issue, onClose }: IssueModalProps) {
               <div className="space-y-3">
                 <select
                   value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  // ✅ Cast value to Issue['status']
+                  onChange={(e) =>
+                    setSelectedStatus(e.target.value as Issue['status'])
+                  }
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="Open">Open</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
                 </select>
-                
+
                 <textarea
                   placeholder="Add a comment..."
                   rows={3}
                   className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
-                
+
                 <div className="flex space-x-3">
                   <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                     Update Issue

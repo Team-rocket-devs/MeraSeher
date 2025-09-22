@@ -1,34 +1,45 @@
 export interface Issue {
-  id: string;
+  _id: string;  // ✅ matches MongoDB
+  title: string;
   category: string;
-  location: string;
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  status: 'Open' | 'In Progress' | 'Resolved';
-  assignedDept: string;
-  date: string;
+  status: 'Open' | 'In Progress' | 'Resolved' | 'Closed'; // ✅ includes Closed
   description: string;
   images: string[];
+  location: {
+    address: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  department: {
+    _id: string;
+    name: string;
+  };
   reporter: {
     name: string;
     email: string;
     phone: string;
   };
-  activities: Activity[];
+  assignedTo?: string;
+  resolvedAt?: string;
+  notes: Note[]; // ✅ replaces activities
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface Activity {
-  id: string;
-  type: 'status_change' | 'comment' | 'assignment';
+export interface Note {
   message: string;
-  user: string;
-  timestamp: string;
+  author: string;
+  createdAt: string;
 }
 
 export interface Department {
-  id: string;
+  _id: string;   // ✅ use Mongo _id
   name: string;
-  totalIssues: number;
-  avgResolutionTime: string;
+  totalIssues?: number;
+  avgResolutionTime?: string;
   staff: number;
   head: string;
 }
