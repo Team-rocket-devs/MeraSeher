@@ -51,7 +51,7 @@ class ApiService {
   }
 
   async createDepartment(data: CreateDepartmentRequest) {
-    return this.request<ApiResponse<Department>>('/departments', {
+    return this.request<ApiResponse<Department>>('/departments/create', {
       method: 'POST',
       body: JSON.stringify(data),
     });

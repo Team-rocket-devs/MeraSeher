@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Filter, Download, Eye } from 'lucide-react';
 import { Issue } from '../types';
 import { IssueModal } from './IssueModal';
@@ -36,11 +36,7 @@ export function Issues() {
         const data = await res.json();
         if (data.success) {
           setIssues(data.data);
-
-          const uniqueCategories = Array.from(
-            new Set(data.data.map((issue: Issue) => issue.category))
-          ) as string[];
-          setCategories(uniqueCategories);
+          console.log(data);
         } else {
           console.error(data.message);
         }
@@ -56,6 +52,14 @@ export function Issues() {
     new Set(issues.map((issue) => issue.department?.name).filter(Boolean))
   );
 
+  useEffect(() => {
+    if (issues.length > 0) {
+      const uniqueCategories = Array.from(
+        new Set(issues.map((issue) => issue.category).filter(Boolean))
+      );
+      setCategories(uniqueCategories);
+    }
+  }, [issues]);
   // 🔹 Apply filters
   const filteredIssues = issues.filter((issue) => {
     return (
@@ -65,6 +69,60 @@ export function Issues() {
       (filters.category === 'All' || issue.category === filters.category)
     );
   });
+
+  // export button logic/code
+  const exportToCSV = () => {
+    if (filteredIssues.length === 0) {
+      alert("No issues available to export!");
+      return;
+    }
+
+    // Define CSV headers
+    const headers = [
+      "Issue ID",
+      "Title",
+      "Category",
+      "Priority",
+      "Status",
+      "Department",
+      "Location",
+      "Reporter Name",
+      "Reporter Email",
+      "Reporter Phone",
+      "Created At"
+    ];
+
+    // Map issues into CSV rows
+    const rows = filteredIssues.map(issue => [
+      issue._id,
+      issue.title,
+      issue.category,
+      issue.priority,
+      issue.status,
+      issue.department?.name || "N/A",
+      issue.location?.address || "N/A",
+      issue.reporter?.name || "N/A",
+      issue.reporter?.email || "N/A",
+      issue.reporter?.phone || "N/A",
+      new Date(issue.createdAt).toLocaleString()
+    ]);
+
+    // Build CSV content
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(","))
+      .join("\n");
+
+    // Download as file
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `issues_export_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -79,7 +137,9 @@ export function Issues() {
           </p>
         </div>
 
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors">
+        <button
+          onClick={exportToCSV}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2 transition-colors">
           <Download className="w-4 h-4" />
           <span>Export</span>
         </button>
@@ -89,9 +149,7 @@ export function Issues() {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div className="flex items-center space-x-4">
           <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Filters:
-          </span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filters:</span>
 
           {/* Status filter */}
           <select
@@ -159,7 +217,7 @@ export function Issues() {
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  ID
+                  Title
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Category

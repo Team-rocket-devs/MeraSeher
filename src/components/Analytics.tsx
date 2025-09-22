@@ -1,8 +1,71 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { chartData } from '../data/mockData';
+// import { chartData } from '../data/mockData';
+
+
 
 export function Analytics() {
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [chartData, setChartData] = useState({
+    monthly: [],
+    departments: [],
+    categories: []
+  });
+
+
+  // Fetch issues from backend
+  useEffect(() => {
+    const fetchIssues = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/issues/get');
+        const data = await res.json();
+        if (data.success) {
+          setIssues(data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching issues:', err);
+      }
+    };
+    fetchIssues();
+  }, []);
+  useEffect(() => {
+    if (!issues.length) return;
+
+    // 1️⃣ Issues Over Time (Monthly)
+    const monthlyMap: Record<string, number> = {};
+    issues.forEach(issue => {
+      const month = new Date(issue.createdAt).toLocaleString('default', { month: 'short', year: 'numeric' });
+      monthlyMap[month] = (monthlyMap[month] || 0) + 1;
+    });
+    const monthly = Object.entries(monthlyMap)
+      .map(([name, issues]) => ({ name, issues }))
+      .sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime());
+
+    // 2️⃣ Resolutions by Department
+    const deptMap: Record<string, number> = {};
+    issues.forEach(issue => {
+      const deptName = issue.department?.name || 'Unassigned';
+      if (issue.status === 'Resolved' || issue.status === 'Closed') {
+        deptMap[deptName] = (deptMap[deptName] || 0) + 1;
+      }
+    });
+    const departments = Object.entries(deptMap).map(([name, resolved]) => ({ name, resolved }));
+
+    // 3️⃣ Issues by Category
+    const catMap: Record<string, number> = {};
+    issues.forEach(issue => {
+      catMap[issue.category] = (catMap[issue.category] || 0) + 1;
+    });
+    const colors = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#0EA5E9', '#F43F5E', '#84CC16'];
+    const categories = Object.entries(catMap).map(([name, value], index) => ({
+      name,
+      value,
+      fill: colors[index % colors.length]
+    }));
+
+    setChartData({ monthly, departments, categories });
+  }, [issues]);
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -25,7 +88,7 @@ export function Analytics() {
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="name" stroke="#6B7280" />
               <YAxis stroke="#6B7280" />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: '#1F2937',
                   border: 'none',
@@ -48,7 +111,7 @@ export function Analytics() {
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="name" stroke="#6B7280" />
               <YAxis stroke="#6B7280" />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: '#1F2937',
                   border: 'none',
@@ -84,7 +147,7 @@ export function Analytics() {
                   <Cell key={`cell-${index}`} fill={entry.fill} />
                 ))}
               </Pie>
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: '#1F2937',
                   border: 'none',
